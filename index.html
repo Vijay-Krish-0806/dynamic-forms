@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic forms</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+    <script src="index.js" defer type="module"></script>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="time-entries">
+        <div class="individual-time">
+          <i class="fa-solid fa-circle-arrow-right" style="color: green"></i>
+          <span>In:9:30 AM</span>
+        </div>
+        <div class="individual-time">
+          <i class="fa-solid fa-circle-arrow-left" style="color: red"></i>
+          <span>Out:7:00 PM</span>
+        </div>
+        <div class="individual-time">
+          <i class="fa-solid fa-fingerprint"></i>
+          <span>Effective Hours: 8h 45m</span>
+        </div>
+        <div class="individual-time">
+          <i class="fa-solid fa-mug-hot" style="color: orange"></i>
+          <span>Break Hours: 0h 45m</span>
+        </div>
+        <div class="individual-time">
+          <input type="date" name="date" id="date" />
+        </div>
+      </div>
+      <h3>Timesheet entries: <span id="state">Not Submitted</span></h3>
+      <div class="form-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th class="required">Activity</th>
+              <th class="required">Task</th>
+              <th colspan="2">Task Details</th>
+              <th class="required">Start Time</th>
+              <th class="required">End Time</th>
+              <th>Duration Time</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="timesheet-body"></tbody>
+        </table>
+        <div class="add-row-container">
+          <button type="button" id="add-row-btn" class="add-row-btn">
+            <i class="fa-solid fa-plus"></i> Add Another Row
+          </button>
+        </div>
+      </div>
+
+      <div id="showWarningDiv">
+        <h2 id="warning-msg">Cannot add more than 12 rows</h2>
+        <button class="closeBtn">Close</button>
+      </div>
+    </div>
+
+    <div class="submit-container">
+      <div class="comment-area">
+        <h3>Comment:</h3>
+        <textarea type="text" name="comment-details" maxlength="255"></textarea>
+        <div class="limit"><span id="char-count">0/255</span></div>
+      </div>
+      <div class="time-sheet-details">
+        <h3>Time sheet</h3>
+        <div class="times">
+          <div>
+            <h3>Effective Hours</h3>
+            <h3>8h 49m</h3>
+          </div>
+          <div>
+            <h3>Break Hours</h3>
+            <h3>0h 45m</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-btns">
+        <button>Save</button>
+        <button>Submit</button>
+      </div>
+    </div>
+  </body>
+</html>
