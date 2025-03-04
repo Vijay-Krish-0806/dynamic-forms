@@ -3,25 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamic forms</title>
+    <title>Dynamic Timesheet</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-
     <link rel="stylesheet" href="style.css" />
-    <script src="index.js" defer type="module"></script>
   </head>
   <body>
     <div class="main-container">
+      <!-- Time Entries Section -->
       <div class="time-entries">
         <div class="individual-time">
           <i class="fa-solid fa-circle-arrow-right" style="color: green"></i>
-          <span>In:9:30 AM</span>
+          <span>In: 9:30 AM</span>
         </div>
         <div class="individual-time">
           <i class="fa-solid fa-circle-arrow-left" style="color: red"></i>
-          <span>Out:7:00 PM</span>
+          <span>Out: 7:00 PM</span>
         </div>
         <div class="individual-time">
           <i class="fa-solid fa-fingerprint"></i>
@@ -35,7 +34,10 @@
           <input type="date" name="date" id="date" />
         </div>
       </div>
+
       <h3>Timesheet entries: <span id="state">Not Submitted</span></h3>
+
+      <!-- Timesheet Form -->
       <div class="form-container">
         <table>
           <thead>
@@ -52,6 +54,7 @@
           </thead>
           <tbody id="timesheet-body"></tbody>
         </table>
+
         <div class="add-row-container">
           <button type="button" id="add-row-btn" class="add-row-btn">
             <i class="fa-solid fa-plus"></i> Add Another Row
@@ -59,36 +62,141 @@
         </div>
       </div>
 
-      <div id="showWarningDiv">
-        <h2 id="warning-msg">Cannot add more than 12 rows</h2>
-        <button class="closeBtn">Close</button>
-      </div>
-    </div>
-
-    <div class="submit-container">
-      <div class="comment-area">
-        <h3>Comment:</h3>
-        <textarea type="text" name="comment-details" maxlength="255"></textarea>
-        <div class="limit"><span id="char-count">0/255</span></div>
-      </div>
-      <div class="time-sheet-details">
-        <h3>Time sheet</h3>
-        <div class="times">
-          <div>
-            <h3>Effective Hours</h3>
-            <h3>8h 49m</h3>
-          </div>
-          <div>
-            <h3>Break Hours</h3>
-            <h3>0h 45m</h3>
-          </div>
+      <!-- Warning Popup -->
+      <div id="showWarningDiv" class="warning-popup">
+        <div class="warning-content">
+          <h2 id="warning-msg">Cannot add more than 12 rows</h2>
+          <button class="closeBtn">Close</button>
         </div>
       </div>
 
-      <div class="submit-btns">
-        <button>Save</button>
-        <button>Submit</button>
+      <!-- Submit Section -->
+      <div class="submit-container">
+        <div class="comment-area">
+          <h3>Comment:</h3>
+          <textarea name="comment-details" maxlength="255"></textarea>
+          <div class="limit"><span id="char-count">0/255</span></div>
+        </div>
+        <div class="time-sheet-details">
+          <h3>Time sheet</h3>
+          <div class="times">
+            <div>
+              <h3>Effective Hours</h3>
+              <h3>8h 49m</h3>
+            </div>
+            <div>
+              <h3>Break Hours</h3>
+              <h3>0h 45m</h3>
+            </div>
+          </div>
+        </div>
+        <div class="submit-btns">
+          <button>Save</button>
+          <button>Submit</button>
+        </div>
       </div>
     </div>
+
+    <!-- Row Template -->
+    <template id="row-template">
+      <tr class="field-row">
+        <td id="activity-dropdown-img"></td>
+        <td>
+          <select class="activity-dropdown">
+            <!-- Activity options will be dynamically populated -->
+          </select>
+        </td>
+        <td>
+          <select class="task-dropdown">
+            <!-- Task options will be dynamically populated -->
+          </select>
+        </td>
+        <td colspan="2" class="task-details-td">
+          <input type="text" class="task-details" maxlength="255" required/>
+          <div class="limit">
+            <span class="task-details-warning">task-details-warning</span
+            ><span class="char-count">0/255</span>
+          </div>
+        </td>
+        <td>
+          <div class="time-picker start-time-picker">
+            <div class="time-display start-time-display">
+              <span class="start-time-text">12:00 AM</span>
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="time-dropdown start-time-dropdown hidden">
+              <div class="time-input">
+                <input type="text" class="start-hours"  />
+                <div class="buttons">
+                  <button type="button" class="start-hours-up">
+                    <i class="fa-solid fa-chevron-up"></i>
+                  </button>
+                  <button type="button" class="start-hours-down">
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="time-input">
+                <input type="text" class="start-minutes" />
+                <div class="buttons">
+                  <button type="button" class="start-minutes-up">
+                    <i class="fa-solid fa-chevron-up"></i>
+                  </button>
+                  <button type="button" class="start-minutes-down">
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </button>
+                </div>
+              </div>
+              <select class="start-ampm">
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="time-picker end-time-picker">
+            <div class="time-display end-time-display">
+              <span class="end-time-text">12:00 AM</span>
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="time-dropdown end-time-dropdown hidden">
+              <div class="time-input">
+                <input type="text" class="end-hours" />
+                <div class="buttons">
+                  <button type="button" class="end-hours-up">
+                    <i class="fa-solid fa-chevron-up"></i>
+                  </button>
+                  <button type="button" class="end-hours-down">
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="time-input">
+                <input type="text" class="end-minutes" />
+                <div class="buttons">
+                  <button type="button" class="end-minutes-up">
+                    <i class="fa-solid fa-chevron-up"></i>
+                  </button>
+                  <button type="button" class="end-minutes-down">
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </button>
+                </div>
+              </div>
+              <select class="end-ampm">
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+          </div>
+        </td>
+        <td><div class="duration">0h 0m</div></td>
+        <td class="row-actions">
+          <i class="fa-solid fa-trash delete-row" title="Delete row"></i>
+        </td>
+      </tr>
+    </template>
+
+    <script src="index.js" type="module"></script>
   </body>
 </html>
