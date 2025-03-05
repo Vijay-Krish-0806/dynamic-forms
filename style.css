@@ -102,14 +102,25 @@ td > select {
   visibility: hidden;
   letter-spacing: 1px;
 }
+
+.time-error {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  background-color: #fff;
+  color: red;
+  font-size: 0.8em;
+  white-space: nowrap;
+}
 /* Time picker styles */
 .time-picker {
   position: relative;
-  width: 90%;
+  max-width: 90%;
+  border: 1px solid;
 }
 
 .time-display {
-  width: 100%;
+  /* max-width: 100%; */
   padding: 6px;
   border: 1px solid #ccc;
   cursor: pointer;
@@ -122,7 +133,7 @@ td > select {
 
 .time-dropdown {
   position: absolute;
-  width: 100%;
+  /* width: 100%; */
   z-index: 10;
   background: white;
   border: 1px solid #ccc;
@@ -130,6 +141,9 @@ td > select {
   border-radius: 4px;
   padding: 6px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .hidden {
@@ -139,6 +153,7 @@ td > select {
 .time-input {
   position: relative;
   display: inline-flex;
+  flex-direction: column;
   padding-right: 2px;
 }
 
@@ -156,13 +171,15 @@ td > select {
   right: 0;
 }
 
-.buttons button {
+.time-input button {
   border: none;
-  background: transparent;
+  /* background: transparent; */
   cursor: pointer;
   font-size: 10px;
   padding: 1px;
   height: 12px;
+  width: 40px;
+  background-color: #fff;
 }
 
 #start-ampm,
@@ -234,29 +251,39 @@ td > select {
   height: 200px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   z-index: 20;
   text-align: center;
   padding: 20px;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.warning-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 #showWarningDiv button {
   padding: 8px 16px;
-  background-color: #4682b4;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  background-color: #3a6d96;
 }
 
-#showWarningDiv button:hover {
-  background-color: #3a6d96;
+#showWarningDiv .cancelBtn {
+  background-color: #d3e9fa;
+  border: 1px dotted red;
+  color: black;
 }
 
 .body-warning {
   background-color: #d6d6d6;
   input,
-  select {
+  select,
+  textarea {
     background-color: #d6d6d6;
   }
 }

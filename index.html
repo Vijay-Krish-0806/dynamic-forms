@@ -64,9 +64,10 @@
 
       <!-- Warning Popup -->
       <div id="showWarningDiv" class="warning-popup">
-        <div class="warning-content">
-          <h2 id="warning-msg">Cannot add more than 12 rows</h2>
-          <button class="closeBtn">Close</button>
+        <h2 id="warning-msg">Cannot add more than 12 rows</h2>
+        <div class="warning-buttons">
+          <button class="closeBtn">OK</button>
+          <button class="cancelBtn">Cancel</button>
         </div>
       </div>
 
@@ -91,7 +92,7 @@
           </div>
         </div>
         <div class="submit-btns">
-          <button>Save</button>
+          <button id="save-btn" >Save</button>
           <button>Submit</button>
         </div>
       </div>
@@ -100,7 +101,7 @@
     <!-- Row Template -->
     <template id="row-template">
       <tr class="field-row">
-        <td id="activity-dropdown-img"></td>
+        <td class="activity-icon"></td>
         <td>
           <select class="activity-dropdown">
             <!-- Activity options will be dynamically populated -->
@@ -112,7 +113,7 @@
           </select>
         </td>
         <td colspan="2" class="task-details-td">
-          <input type="text" class="task-details" maxlength="255" required/>
+          <input type="text" class="task-details" maxlength="255" required />
           <div class="limit">
             <span class="task-details-warning">task-details-warning</span
             ><span class="char-count">0/255</span>
@@ -126,26 +127,24 @@
             </div>
             <div class="time-dropdown start-time-dropdown hidden">
               <div class="time-input">
-                <input type="text" class="start-hours"  />
-                <div class="buttons">
-                  <button type="button" class="start-hours-up">
-                    <i class="fa-solid fa-chevron-up"></i>
-                  </button>
-                  <button type="button" class="start-hours-down">
-                    <i class="fa-solid fa-chevron-down"></i>
-                  </button>
-                </div>
+                <button type="button" class="start-hours-up">
+                  <i class="fa-solid fa-chevron-up"></i>
+                </button>
+                <input type="text" class="start-hours" />
+
+                <button type="button" class="start-hours-down">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </button>
               </div>
               <div class="time-input">
+                <button type="button" class="start-minutes-up">
+                  <i class="fa-solid fa-chevron-up"></i>
+                </button>
                 <input type="text" class="start-minutes" />
-                <div class="buttons">
-                  <button type="button" class="start-minutes-up">
-                    <i class="fa-solid fa-chevron-up"></i>
-                  </button>
-                  <button type="button" class="start-minutes-down">
-                    <i class="fa-solid fa-chevron-down"></i>
-                  </button>
-                </div>
+
+                <button type="button" class="start-minutes-down">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </button>
               </div>
               <select class="start-ampm">
                 <option value="AM">AM</option>
@@ -162,26 +161,24 @@
             </div>
             <div class="time-dropdown end-time-dropdown hidden">
               <div class="time-input">
+                <button type="button" class="end-hours-up">
+                  <i class="fa-solid fa-chevron-up"></i>
+                </button>
                 <input type="text" class="end-hours" />
-                <div class="buttons">
-                  <button type="button" class="end-hours-up">
-                    <i class="fa-solid fa-chevron-up"></i>
-                  </button>
-                  <button type="button" class="end-hours-down">
-                    <i class="fa-solid fa-chevron-down"></i>
-                  </button>
-                </div>
+
+                <button type="button" class="end-hours-down">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </button>
               </div>
               <div class="time-input">
+                <button type="button" class="end-minutes-up">
+                  <i class="fa-solid fa-chevron-up"></i>
+                </button>
                 <input type="text" class="end-minutes" />
-                <div class="buttons">
-                  <button type="button" class="end-minutes-up">
-                    <i class="fa-solid fa-chevron-up"></i>
-                  </button>
-                  <button type="button" class="end-minutes-down">
-                    <i class="fa-solid fa-chevron-down"></i>
-                  </button>
-                </div>
+
+                <button type="button" class="end-minutes-down">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </button>
               </div>
               <select class="end-ampm">
                 <option value="AM">AM</option>

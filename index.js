@@ -1,6 +1,10 @@
-// Timesheet Functional Implementation
+// ==============================
+// Timesheet Functional Implementation with Local Storage Persistence
+// ==============================
 
+// ----------------------
 // Configuration
+// ----------------------
 const ACTIVITY_TASKS = {
   Training: [
     "Self Learning",
@@ -14,140 +18,167 @@ const ACTIVITY_TASKS = {
   Miscellaneous: ["Miscellaneous"],
 };
 
+// ----------------------
 // State Management
-let state = {
+// ----------------------
+const state = {
   rowCounter: 0,
   rowTemplate: null,
   timesheetBody: null,
   addRowBtn: null,
   warningDiv: null,
   warningMsg: null,
-  imageForTask: null,
+  unsavedChanges: false,
 };
 
+// ----------------------
 // Utility Functions
+// ----------------------
 function getCurrentTime() {
   const now = new Date();
   const hours = now.getHours();
   const minutes = now.getMinutes();
   const ampm = hours >= 12 ? "PM" : "AM";
   const displayHours = hours % 12 || 12;
-
-  return {
-    hours: displayHours,
-    minutes,
-    ampm,
-  };
+  return { hours: displayHours, minutes, ampm };
 }
 
 function timeToMinutes(timeStr) {
   const [time, period] = timeStr.split(" ");
   let [hours, minutes] = time.split(":").map(Number);
-
   if (period === "PM" && hours < 12) hours += 12;
   if (period === "AM" && hours === 12) hours = 0;
-
   return hours * 60 + minutes;
 }
 
 function calculateDuration(startTimeText, endTimeText) {
   const startMinutes = timeToMinutes(startTimeText);
   const endMinutes = timeToMinutes(endTimeText);
-
   let durationMinutes = endMinutes - startMinutes;
   if (durationMinutes < 0) durationMinutes += 24 * 60;
-
   const hours = Math.floor(durationMinutes / 60);
   const minutes = durationMinutes % 60;
-
   return `${hours}h ${minutes}m`;
 }
 
+function createErrorSpan(message) {
+  const span = document.createElement("span");
+  span.textContent = message;
+  span.classList.add("time-error");
+  span.style.color = "red";
+  span.style.fontSize = "0.8em";
+  return span;
+}
+
+// ----------------------
 // Time Validation Functions
+// ----------------------
 function validateTimeBetweenRows() {
   const rows = document.querySelectorAll("#timesheet-body .field-row");
-  let previousEndTime = null;
+  let previousEndMinutes = null;
+  let valid = true;
 
-  for (let i = 0; i < rows.length; i++) {
-    const currentRow = rows[i];
-    const startTimeText =
-      currentRow.querySelector(".start-time-text").textContent;
-    const endTimeText = currentRow.querySelector(".end-time-text").textContent;
-    const startTimeDisplay = currentRow.querySelector(".start-time-display");
-    const endTimeDisplay = currentRow.querySelector(".end-time-display");
+  // Remove previous time error messages
+  rows.forEach((row) =>
+    row.querySelectorAll(".time-error").forEach((err) => err.remove())
+  );
 
-    // Reset previous error messages
-    const previousStartTimeError =
-      currentRow.querySelector(".start-time-error");
-    const previousEndTimeError = currentRow.querySelector(".end-time-error");
-    if (previousStartTimeError) previousStartTimeError.remove();
-    if (previousEndTimeError) previousEndTimeError.remove();
-
-    // Convert times to minutes for comparison
+  rows.forEach((row) => {
+    const startTimeText = row.querySelector(".start-time-text").textContent;
+    const endTimeText = row.querySelector(".end-time-text").textContent;
+    const startTimeDisplay = row.querySelector(".start-time-display");
     const startMinutes = timeToMinutes(startTimeText);
     const endMinutes = timeToMinutes(endTimeText);
 
-    // Validate end time is after start time
     if (endMinutes <= startMinutes) {
-      const errorSpan = document.createElement("span");
-      errorSpan.textContent = "End time must be after start time";
-      errorSpan.classList.add("time-error", "start-time-error");
-      errorSpan.style.color = "red";
-      errorSpan.style.fontSize = "0.8em";
+      const errorSpan = createErrorSpan("End time must be after start time");
       startTimeDisplay.parentNode.insertBefore(
         errorSpan,
         startTimeDisplay.nextSibling
       );
-      return false;
+      valid = false;
     }
-
-    // Validate start time against previous row's end time
-    if (previousEndTime !== null && startMinutes < previousEndTime) {
-      const errorSpan = document.createElement("span");
-      errorSpan.textContent =
-        "Start time must be after previous row's end time";
-      errorSpan.classList.add("time-error", "start-time-error");
-      errorSpan.style.color = "red";
-      errorSpan.style.fontSize = "0.8em";
+    if (previousEndMinutes !== null && startMinutes < previousEndMinutes) {
+      const errorSpan = createErrorSpan(
+        "Start time must be after previous row's end time"
+      );
       startTimeDisplay.parentNode.insertBefore(
         errorSpan,
         startTimeDisplay.nextSibling
       );
-      return false;
+      valid = false;
     }
-
-    // Update previous end time for next iteration
-    previousEndTime = endMinutes;
-  }
-
-  return true;
+    previousEndMinutes = endMinutes;
+  });
+  return valid;
 }
 
+function validateRowTime(row) {
+  row.querySelectorAll(".time-error").forEach((err) => err.remove());
+  const startTimeText = row.querySelector(".start-time-text").textContent;
+  const endTimeText = row.querySelector(".end-time-text").textContent;
+  const startTimeDisplay = row.querySelector(".start-time-display");
+  const startMinutes = timeToMinutes(startTimeText);
+  const endMinutes = timeToMinutes(endTimeText);
+
+  if (endMinutes <= startMinutes) {
+    const errorSpan = createErrorSpan("End time must be after start time");
+    startTimeDisplay.parentNode.insertBefore(
+      errorSpan,
+      startTimeDisplay.nextSibling
+    );
+  }
+  // Validate against previous row's end time
+  const rows = Array.from(state.timesheetBody.children);
+  const currentIndex = rows.indexOf(row);
+  if (currentIndex > 0) {
+    const prevRow = rows[currentIndex - 1];
+    const prevEndTimeText = prevRow.querySelector(".end-time-text").textContent;
+    const prevEndMinutes = timeToMinutes(prevEndTimeText);
+    if (startMinutes < prevEndMinutes) {
+      const errorSpan = createErrorSpan(
+        "Start time must be after previous row's end time"
+      );
+      startTimeDisplay.parentNode.insertBefore(
+        errorSpan,
+        startTimeDisplay.nextSibling
+      );
+    }
+  }
+}
+
+// ----------------------
 // DOM Manipulation Functions
+// ----------------------
 function initializeDOM() {
   state.rowTemplate = document.getElementById("row-template");
   state.timesheetBody = document.getElementById("timesheet-body");
   state.addRowBtn = document.getElementById("add-row-btn");
   state.warningDiv = document.getElementById("showWarningDiv");
   state.warningMsg = document.getElementById("warning-msg");
-  state.imageForTask = document.getElementById("activity-dropdown-img");
 
   // Set today's date
   document.getElementById("date").valueAsDate = new Date();
 
-  // Add event listeners
+  // Event listeners for add row, warning popup, and outside clicks
   state.addRowBtn.addEventListener("click", addRow);
-  document.querySelector(".closeBtn").addEventListener("click", hideWarning);
+  document
+    .querySelector(".closeBtn")
+    .addEventListener("click", () => hideWarning());
+  document
+    .querySelector(".cancelBtn")
+    .addEventListener("click", () => hideWarning());
   document.addEventListener("click", handleOutsideClick);
 
-  // Initialize comment character counter
+  // Comment character counter
   const commentTextarea = document.querySelector(
     'textarea[name="comment-details"]'
   );
-  const commentTextareaSpan = document.querySelector(
-    'textarea[name="comment-details"] '
-  );
   commentTextarea.addEventListener("input", updateCommentCharCount);
+  commentTextarea.addEventListener("input", enableSaveButton);
+
+  // Delegate changes in the timesheet body to re-enable Save button
+  state.timesheetBody.addEventListener("input", enableSaveButton);
 
   // Create first row
   addRow();
@@ -159,31 +190,39 @@ function updateCommentCharCount(event) {
 }
 
 function addRow() {
-  if (state.rowCounter >= 11) {
+  if (state.rowCounter >= 12) {
     showWarning("Cannot add more than 12 rows");
     return;
   }
-
-  // Clone the template content
-  const newRowElement = state.rowTemplate.content.cloneNode(true);
-  const newRow = newRowElement.querySelector(".field-row");
-
-  // Set unique identifier
+  const newRowFragment = state.rowTemplate.content.cloneNode(true);
+  const newRow = newRowFragment.querySelector(".field-row");
   newRow.id = `row-${state.rowCounter}`;
 
-  // Populate activity dropdown
+  // Populate activity dropdown and task dropdown
   const activityDropdown = newRow.querySelector(".activity-dropdown");
   populateActivityDropdown(activityDropdown);
-
-  // Populate initial task dropdown
   const taskDropdown = newRow.querySelector(".task-dropdown");
-  const imageType = newRow.querySelector("#activity-dropdown-img");
-  populateTaskDropdown(activityDropdown, taskDropdown, imageType);
+  const activityIcon = newRow.querySelector(".activity-icon");
+  populateTaskDropdown(activityDropdown, taskDropdown, activityIcon);
 
-  // Setup row-specific event listeners
+  // Hide delete button for first row
+  if (state.rowCounter === 0) {
+    const deleteBtn =
+      newRow.querySelector(".delete-row") ||
+      newRow.querySelector(".delete-row-btn");
+    if (deleteBtn) {
+      deleteBtn.style.display = "none";
+    }
+  } else {
+    const deleteBtn =
+      newRow.querySelector(".delete-row") ||
+      newRow.querySelector(".delete-row-btn");
+    if (deleteBtn) {
+      deleteBtn.style.display = "";
+    }
+  }
+
   setupRowListeners(newRow);
-
-  // Append to table body
   state.timesheetBody.appendChild(newRow);
   state.rowCounter++;
 }
@@ -197,22 +236,16 @@ function populateActivityDropdown(activityDropdown) {
   });
 }
 
-function populateTaskDropdown(activityDropdown, taskDropdown, imageType) {
+function populateTaskDropdown(activityDropdown, taskDropdown, activityIcon) {
   const selectedActivity = activityDropdown.value;
-
-  if (imageType) {
-    imageType.innerHTML =
+  if (activityIcon) {
+    activityIcon.innerHTML =
       selectedActivity === "Break"
         ? `<i class="fa-solid fa-mug-hot" style="color:orange"></i>`
-        : `<i class="fa-solid fa-briefcase">`;
+        : `<i class="fa-solid fa-briefcase"></i>`;
   }
-
   const tasks = ACTIVITY_TASKS[selectedActivity] || [];
-
-  // Clear current options
   taskDropdown.innerHTML = "";
-
-  // Add new options
   tasks.forEach((task) => {
     const option = document.createElement("option");
     option.value = task;
@@ -223,102 +256,71 @@ function populateTaskDropdown(activityDropdown, taskDropdown, imageType) {
 
 function validateTimesheet() {
   const rows = document.querySelectorAll("#timesheet-body .field-row");
-  const requiredFields = [];
+  let valid = true;
+  const missingFields = [];
 
-  // Validate each row
   rows.forEach((row, index) => {
-    const rowErrors = {
-      rowIndex: index,
-      missingFields: [],
-    };
-
-    // Validate Activity Dropdown
-    const activityDropdown = row.querySelector(".activity-dropdown");
-    if (!activityDropdown.value) {
-      rowErrors.missingFields.push(activityDropdown);
+    row
+      .querySelectorAll(".error-field")
+      .forEach((field) => field.classList.remove("error-field"));
+    if (!row.querySelector(".activity-dropdown").value) {
+      missingFields.push({
+        field: row.querySelector(".activity-dropdown"),
+        rowIndex: index,
+      });
     }
-
-    // Validate Task Dropdown
-    const taskDropdown = row.querySelector(".task-dropdown");
-    if (!taskDropdown.value) {
-      rowErrors.missingFields.push(taskDropdown);
+    if (!row.querySelector(".task-dropdown").value) {
+      missingFields.push({
+        field: row.querySelector(".task-dropdown"),
+        rowIndex: index,
+      });
     }
-
-    // Validate Task Details
     const taskDetails = row.querySelector(".task-details");
     if (!taskDetails.value.trim()) {
-      rowErrors.missingFields.push(taskDetails);
+      missingFields.push({ field: taskDetails, rowIndex: index });
     }
-
-    // Validate Start Time
-    const startTimeText = row.querySelector(".start-time-text");
-    if (startTimeText.textContent === "12:00 AM") {
-      rowErrors.missingFields.push(row.querySelector(".start-time-display"));
+    const startTimeText = row.querySelector(".start-time-text").textContent;
+    if (startTimeText === "12:00 AM") {
+      missingFields.push({
+        field: row.querySelector(".start-time-display"),
+        rowIndex: index,
+      });
     }
-
-    // Validate End Time
-    const endTimeText = row.querySelector(".end-time-text");
-    if (endTimeText.textContent === "12:00 AM") {
-      rowErrors.missingFields.push(row.querySelector(".end-time-display"));
-    }
-
-    // If any required fields are missing
-    if (rowErrors.missingFields.length > 0) {
-      requiredFields.push(rowErrors);
+    const endTimeText = row.querySelector(".end-time-text").textContent;
+    if (endTimeText === "12:00 AM") {
+      missingFields.push({
+        field: row.querySelector(".end-time-display"),
+        rowIndex: index,
+      });
     }
   });
 
-  // If there are missing fields, show warning and return false
-  if (requiredFields.length > 0) {
-    // Focus on the first missing field of the first row with errors
-    const firstErrorRow = requiredFields[0];
-    const firstMissingField = firstErrorRow.missingFields[0];
-
-    // Add error styling
-    requiredFields.forEach((errorRow) => {
-      errorRow.missingFields.forEach((field) => {
-        field.classList.add("error-field");
-      });
-    });
-
-    // Focus on the first missing field
-    firstMissingField.focus();
-
-    // Optional: Scroll to the row with errors
-    const rowToScroll = document.getElementById(
-      `row-${firstErrorRow.rowIndex}`
-    );
-    if (rowToScroll) {
-      rowToScroll.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (missingFields.length > 0) {
+    missingFields.forEach((item) => item.field.classList.add("error-field"));
+    const firstError = missingFields[0];
+    const firstRow = document.getElementById(`row-${firstError.rowIndex}`);
+    firstError.field.focus();
+    if (firstRow) {
+      firstRow.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-
-    // Show error message
     showWarning("Please fill in all required fields.");
-    return false;
+    valid = false;
   }
-
-  // Additional time validation
   if (!validateTimeBetweenRows()) {
     showWarning("Please correct time entries.");
-    return false;
+    valid = false;
   }
-
-  return true;
+  return valid;
 }
 
 function setupSubmitButton() {
   const submitButtons = document.querySelectorAll(".submit-btns button");
-
   submitButtons.forEach((button) => {
     button.addEventListener("click", (event) => {
-      // Prevent default form submission
       event.preventDefault();
-
-      // Validate the timesheet
       if (validateTimesheet()) {
-        // If validation passes, you can proceed with submission
         console.log("Timesheet is valid. Proceeding with submission...");
-        // Add your submission logic here
+        // Add your submission logic here.
       }
     });
   });
@@ -328,7 +330,7 @@ function addValidationStyles() {
   const style = document.createElement("style");
   style.textContent = `
     .error-field {
-        border: 2px solid red !important;
+      border: 2px solid red !important;
     }
     .time-error {
       display: block;
@@ -340,45 +342,48 @@ function addValidationStyles() {
   document.head.appendChild(style);
 }
 
+// ----------------------
+// Row & Time Picker Listeners
+// ----------------------
 function setupRowListeners(row) {
   const activityDropdown = row.querySelector(".activity-dropdown");
   const taskDropdown = row.querySelector(".task-dropdown");
   const taskDetails = row.querySelector(".task-details");
-  const taskDetailsSpan = row.querySelector(".task-details-warning");
-  const imageType = row.querySelector("#activity-dropdown-img");
+  const taskDetailsWarning = row.querySelector(".task-details-warning");
+  const activityIcon = row.querySelector(".activity-icon");
   const charCount = row.querySelector(".char-count");
-  const deleteBtn = row.querySelector(".delete-row");
+  const deleteBtn =
+    row.querySelector(".delete-row") || row.querySelector(".delete-row-btn");
 
-  // Activity dropdown change handler
   activityDropdown.addEventListener("change", () => {
-    populateTaskDropdown(activityDropdown, taskDropdown, imageType);
+    populateTaskDropdown(activityDropdown, taskDropdown, activityIcon);
+    enableSaveButton();
   });
 
-  // Task details character counter
   taskDetails.addEventListener("input", () => {
-    taskDetailsSpan.style.visibility = "hidden";
     const count = taskDetails.value.length;
     charCount.textContent = `${count}/255`;
-  });
-  taskDetails.addEventListener("blur", () => {
-    const count = taskDetails.value.length;
     if (count === 0) {
-      taskDetailsSpan.style.visibility = "visible";
-      taskDetailsSpan.textContent = "*Can't be empty";
+      taskDetailsWarning.style.visibility = "visible";
+      taskDetailsWarning.textContent = "*Can't be empty";
+    } else {
+      taskDetailsWarning.style.visibility = "hidden";
     }
+    enableSaveButton();
   });
 
   enhanceRowListeners(row);
 
-  // Time picker dropdowns
   const startTimePicker = row.querySelector(".start-time-picker");
   const endTimePicker = row.querySelector(".end-time-picker");
-
   setupTimePicker(startTimePicker, "start");
   setupTimePicker(endTimePicker, "end");
 
-  // Delete row button
-  deleteBtn.addEventListener("click", () => deleteRow(row));
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", () => {
+      showDeleteWarning(row);
+    });
+  }
 }
 
 function enhanceRowListeners(row) {
@@ -389,27 +394,19 @@ function enhanceRowListeners(row) {
     row.querySelector(".start-time-display"),
     row.querySelector(".end-time-display"),
   ];
-
   requiredFields.forEach((field) => {
     field.addEventListener("input", () => {
       field.classList.remove("error-field");
+      enableSaveButton();
     });
-
-    // Special handling for time displays
-    if (
-      field.classList.contains("start-time-display") ||
-      field.classList.contains("end-time-display")
-    ) {
-      field.addEventListener("click", () => {
-        field.classList.remove("error-field");
-
-        // Remove any existing time error messages
-        const existingErrors = field
-          .closest(".field-row")
-          .querySelectorAll(".time-error");
-        existingErrors.forEach((error) => error.remove());
-      });
-    }
+    field.addEventListener("click", () => {
+      field.classList.remove("error-field");
+      const errors = field
+        .closest(".field-row")
+        .querySelectorAll(".time-error");
+      errors.forEach((error) => error.remove());
+      enableSaveButton();
+    });
   });
 }
 
@@ -420,28 +417,29 @@ function setupTimePicker(timePicker, type) {
   const minutesInput = timePicker.querySelector(`.${type}-minutes`);
   const ampmSelect = timePicker.querySelector(`.${type}-ampm`);
 
-  // Initialize with current time
   const currentTime = getCurrentTime();
   hoursInput.value = currentTime.hours.toString().padStart(2, "0");
   minutesInput.value = currentTime.minutes.toString().padStart(2, "0");
   ampmSelect.value = currentTime.ampm;
+  updateTimeDisplay(timePicker, type);
 
-  // Time display toggle
   timeDisplay.addEventListener("click", (e) => {
     e.stopPropagation();
     toggleTimeDropdown(timeDropdown);
   });
 
-  // Up/Down buttons for hours and minutes
   const hourUpBtn = timePicker.querySelector(`.${type}-hours-up`);
   const hourDownBtn = timePicker.querySelector(`.${type}-hours-down`);
   const minuteUpBtn = timePicker.querySelector(`.${type}-minutes-up`);
   const minuteDownBtn = timePicker.querySelector(`.${type}-minutes-down`);
 
-  
   [hoursInput, minutesInput, ampmSelect].forEach((input) => {
-    input.addEventListener("input", validateTimeBetweenRows);
-    input.addEventListener("change", validateTimeBetweenRows);
+    input.addEventListener("input", () => {
+      updateTimeDisplay(timePicker, type);
+      const row = timePicker.closest(".field-row");
+      validateRowTime(row);
+      enableSaveButton();
+    });
   });
 
   hourUpBtn.addEventListener("click", () => changeTime(hoursInput, 1, "hours"));
@@ -455,49 +453,38 @@ function setupTimePicker(timePicker, type) {
     changeTime(minutesInput, -1, "minutes")
   );
 
-  // Update time on blur or change
   [hoursInput, minutesInput, ampmSelect].forEach((el) => {
-    el.addEventListener("blur", () => updateTimeDisplay(timePicker, type));
-    el.addEventListener("change", () => updateTimeDisplay(timePicker, type));
-
-    // Add event listeners to remove error messages when time is corrected
     el.addEventListener("change", () => {
-      // Remove any existing time error messages
-      const existingErrors = timePicker
+      updateTimeDisplay(timePicker, type);
+      const errors = timePicker
         .closest(".field-row")
         .querySelectorAll(".time-error");
-      existingErrors.forEach((error) => error.remove());
+      errors.forEach((err) => err.remove());
+      enableSaveButton();
     });
   });
 }
 
 function toggleTimeDropdown(dropdown) {
-  // Close all other dropdowns
   document.querySelectorAll(".time-dropdown").forEach((dd) => {
     if (dd !== dropdown) dd.classList.add("hidden");
   });
-
-  // Toggle selected dropdown
   dropdown.classList.toggle("hidden");
 }
 
 function changeTime(input, increment, type) {
-  let value = parseInt(input.value) + increment;
-
+  let value = parseInt(input.value, 10) + increment;
   if (type === "hours") {
     value = value > 12 ? 1 : value < 1 ? 12 : value;
   } else if (type === "minutes") {
     value = value > 59 ? 0 : value < 0 ? 59 : value;
   }
-
   input.value = value.toString().padStart(2, "0");
-  updateTimeDisplay(
-    input.closest(".time-picker"),
-    input.classList.contains("start-hours") ||
-      input.classList.contains("start-minutes")
-      ? "start"
-      : "end"
-  );
+  const parentPicker = input.closest(".time-picker");
+  const typeValue = parentPicker.classList.contains("start-time-picker")
+    ? "start"
+    : "end";
+  updateTimeDisplay(parentPicker, typeValue);
 }
 
 function updateTimeDisplay(timePicker, type) {
@@ -505,32 +492,30 @@ function updateTimeDisplay(timePicker, type) {
   const minutesInput = timePicker.querySelector(`.${type}-minutes`);
   const ampmSelect = timePicker.querySelector(`.${type}-ampm`);
   const timeText = timePicker.querySelector(`.${type}-time-text`);
-
   const hours = hoursInput.value.padStart(2, "0");
   const minutes = minutesInput.value.padStart(2, "0");
   const ampm = ampmSelect.value;
-
   timeText.textContent = `${hours}:${minutes} ${ampm}`;
-
-  // Update duration if both start and end times are set
-  updateDuration(timePicker.closest(".field-row"));
+  const row = timePicker.closest(".field-row");
+  updateDuration(row);
+  validateRowTime(row);
+  enableSaveButton();
 }
 
 function updateDuration(row) {
   const startTimeText = row.querySelector(".start-time-text").textContent;
   const endTimeText = row.querySelector(".end-time-text").textContent;
   const durationElement = row.querySelector(".duration");
-
   if (startTimeText && endTimeText) {
     durationElement.textContent = calculateDuration(startTimeText, endTimeText);
   }
 }
 
 function deleteRow(row) {
-  // Ensure at least one row remains
   if (state.timesheetBody.children.length > 1) {
     state.timesheetBody.removeChild(row);
     state.rowCounter--;
+    enableSaveButton();
   } else {
     showWarning("You must keep at least one row.");
   }
@@ -538,16 +523,8 @@ function deleteRow(row) {
 
 function handleOutsideClick(event) {
   const dropdowns = document.querySelectorAll(".time-dropdown");
-  const isClickInsideDropdown = Array.from(dropdowns).some(
-    (dropdown) =>
-      dropdown.contains(event.target) ||
-      event.target.closest(".time-display") === dropdown.previousElementSibling
-  );
-
-  if (!isClickInsideDropdown) {
-    dropdowns.forEach((dropdown) => {
-      dropdown.classList.add("hidden");
-    });
+  if (![...dropdowns].some((dd) => dd.contains(event.target))) {
+    dropdowns.forEach((dd) => dd.classList.add("hidden"));
   }
 }
 
@@ -562,9 +539,134 @@ function hideWarning() {
   document.body.classList.remove("body-warning");
 }
 
-// Initialize on DOM Content Loaded
+// ----------------------
+// Custom Delete Warning Popup
+// ----------------------
+function showDeleteWarning(row) {
+  state.warningMsg.textContent = "Are you sure you want to delete this row?";
+  state.warningDiv.style.display = "flex";
+  document.body.classList.add("body-warning");
+
+  const okBtn = state.warningDiv.querySelector(".closeBtn");
+  const cancelBtn = state.warningDiv.querySelector(".cancelBtn");
+
+  function okHandler() {
+    deleteRow(row);
+    cleanup();
+  }
+
+  function cancelHandler() {
+    cleanup();
+  }
+
+  function cleanup() {
+    hideWarning();
+    okBtn.removeEventListener("click", okHandler);
+    cancelBtn.removeEventListener("click", cancelHandler);
+  }
+
+  okBtn.addEventListener("click", okHandler);
+  cancelBtn.addEventListener("click", cancelHandler);
+}
+
+// ----------------------
+// Local Storage Functions
+// ----------------------
+function saveTimesheetToLocalStorage() {
+  const timesheetData = {
+    date: document.getElementById("date").value,
+    comment: document.querySelector('textarea[name="comment-details"]').value,
+    rows: [],
+  };
+
+  const rows = document.querySelectorAll("#timesheet-body .field-row");
+  rows.forEach((row) => {
+    const rowData = {
+      activity: row.querySelector(".activity-dropdown").value,
+      task: row.querySelector(".task-dropdown").value,
+      taskDetails: row.querySelector(".task-details").value,
+      startTime: row.querySelector(".start-time-text").textContent,
+      endTime: row.querySelector(".end-time-text").textContent,
+    };
+    timesheetData.rows.push(rowData);
+  });
+
+  localStorage.setItem("timesheetData", JSON.stringify(timesheetData));
+  document.getElementById("save-btn").disabled = true;
+  state.unsavedChanges = false;
+}
+
+function loadTimesheetFromLocalStorage() {
+  const savedData = localStorage.getItem("timesheetData");
+  if (!savedData) return;
+  const timesheetData = JSON.parse(savedData);
+
+  document.getElementById("date").value =
+    timesheetData.date || new Date().toISOString().split("T")[0];
+  document.querySelector('textarea[name="comment-details"]').value =
+    timesheetData.comment || "";
+  document.getElementById("char-count").textContent = `${
+    (timesheetData.comment || "").length
+  }/255`;
+
+  state.timesheetBody.innerHTML = "";
+  state.rowCounter = 0;
+
+  timesheetData.rows.forEach((rowData) => {
+    addRow();
+    const newRow = state.timesheetBody.lastElementChild;
+    newRow.querySelector(".activity-dropdown").value = rowData.activity;
+    newRow
+      .querySelector(".activity-dropdown")
+      .dispatchEvent(new Event("change"));
+    newRow.querySelector(".task-dropdown").value = rowData.task;
+    newRow.querySelector(".task-details").value = rowData.taskDetails;
+    const charCountElem = newRow.querySelector(".char-count");
+    charCountElem.textContent = `${rowData.taskDetails.length}/255`;
+
+    const [startTime, startPeriod] = rowData.startTime.split(" ");
+    const [startHours, startMinutes] = startTime.split(":");
+    const startTimePicker = newRow.querySelector(".start-time-picker");
+    startTimePicker.querySelector(".start-hours").value = startHours;
+    startTimePicker.querySelector(".start-minutes").value = startMinutes;
+    startTimePicker.querySelector(".start-ampm").value = startPeriod;
+    updateTimeDisplay(startTimePicker, "start");
+
+    const [endTime, endPeriod] = rowData.endTime.split(" ");
+    const [endHours, endMinutes] = endTime.split(":");
+    const endTimePicker = newRow.querySelector(".end-time-picker");
+    endTimePicker.querySelector(".end-hours").value = endHours;
+    endTimePicker.querySelector(".end-minutes").value = endMinutes;
+    endTimePicker.querySelector(".end-ampm").value = endPeriod;
+    updateTimeDisplay(endTimePicker, "end");
+  });
+
+  document.getElementById("save-btn").disabled = true;
+  state.unsavedChanges = false;
+}
+
+// ----------------------
+// Unsaved Changes Handling
+// ----------------------
+function enableSaveButton() {
+  if (document.getElementById("save-btn").disabled) {
+    document.getElementById("save-btn").disabled = false;
+    state.unsavedChanges = true;
+  }
+}
+
+// ----------------------
+// Initialization
+// ----------------------
 document.addEventListener("DOMContentLoaded", () => {
   initializeDOM();
   addValidationStyles();
   setupSubmitButton();
+  loadTimesheetFromLocalStorage();
+
+  // Save button listener for local storage save
+  document.getElementById("save-btn").addEventListener("click", (e) => {
+    e.preventDefault();
+    saveTimesheetToLocalStorage();
+  });
 });
