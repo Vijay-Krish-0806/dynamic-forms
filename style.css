@@ -18,6 +18,7 @@
   gap: 5px;
   border-radius: 5px;
   white-space: nowrap;
+  background-color: #d6ebfd;
 }
 
 i {
@@ -39,6 +40,7 @@ i {
   scrollbar-width: none;
   height: 45vh;
   border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 /* Table styles */
@@ -47,12 +49,16 @@ table {
   width: 100%;
 }
 
-.field-row {
-  height: 80px;
+thead {
+  background-color: #d6ebfd;
 }
 
+/* .field-row {
+  height: 80px;
+} */
+
 th {
-  color: rgb(0, 60, 255);
+  color: #012b4e;
   text-align: left;
   padding: 8px;
   border-bottom: 2px solid #ddd;
@@ -61,7 +67,7 @@ th {
 td {
   padding: 8px;
   border-bottom: 1px solid #ddd;
-  vertical-align: top;
+  /* vertical-align: top; */
 }
 
 /* Required fields */
@@ -72,26 +78,45 @@ td {
 
 /* Form controls */
 td > select {
-  min-width: 150px;
-  max-width: 200px;
-  white-space: nowrap;
-  height: 30px;
+  min-width: 200px;
+  max-width: 250px;
+  height: 35px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  color: #012b4e;
+  &:focus {
+    outline: none;
+  }
 }
 
-.task-details-td,
 .comment-area {
   padding: 6px;
   position: relative;
 }
+
 .task-details {
-  width: 80%;
-  height: 30px;
+  width: 90%;
+  height: 50px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: none;
+  position: relative;
+  padding: 8px;
+}
+
+.task-details:focus {
+  outline: 3px solid #e1f3fc;
+}
+
+.task-details-td {
+  width: 30%;
 }
 
 .limit {
   font-size: 14px;
   margin-top: 2px;
-  width: 80%;
+  width: 90%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -112,11 +137,11 @@ td > select {
   font-size: 0.8em;
   white-space: nowrap;
 }
+
 /* Time picker styles */
 .time-picker {
   position: relative;
   max-width: 90%;
-  border: 1px solid;
 }
 
 .time-display {
@@ -124,11 +149,10 @@ td > select {
   padding: 6px;
   border: 1px solid #ccc;
   cursor: pointer;
-  text-align: left;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: inline-block;
+  text-align: center;
   border-radius: 4px;
+  background-color: #fff;
 }
 
 .time-dropdown {
@@ -239,6 +263,13 @@ td > select {
   color: red;
   cursor: pointer;
 }
+.split-row {
+  cursor: pointer;
+}
+.split-row-disable {
+  pointer-events: none;
+  opacity: 0.3;
+}
 
 #showWarningDiv {
   display: none;
@@ -274,9 +305,8 @@ td > select {
 }
 
 #showWarningDiv .cancelBtn {
-  background-color: #d3e9fa;
-  border: 1px dotted red;
-  color: black;
+  background-color: rgb(248, 80, 80);
+  color: white;
 }
 
 .body-warning {
@@ -294,54 +324,85 @@ td > select {
   position: fixed;
   bottom: 20px;
   width: 100%;
-  border: 1px solid;
   align-items: center;
 }
 
+.comment-area {
+  position: relative;
+}
 .comment-area textarea {
   width: 100%;
   height: 150px;
   margin-top: -15px;
   text-align: left;
   resize: none;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  &:focus {
+    outline: 3px solid #e1f3fc;
+  }
 }
 
 .comment-area .limit {
+  display: inline-flex;
+  justify-content: flex-end;
+  position: absolute;
   right: 0;
+  bottom: -10px;
 }
 
 .time-sheet-details {
-  background-color: #b8defe;
+  background-color: #c7e6ff;
   height: 100px;
   text-align: center;
   h3 {
     margin: 0;
   }
+  border-radius: 5px;
 }
 
 .times {
   display: flex;
   width: 100%;
   justify-content: space-around;
-
-  h3 {
-    margin: 0;
-  }
 }
 
 .submit-btns {
   display: flex;
   align-items: center;
-  margin-left: 20px;
-  gap: 20px;
+  margin-left: 10px;
+  gap: 10px;
 }
 
-.submit-btns button {
-  background-color: #2996f0;
+.submit-btns button,
+.clock-in-out-btns button {
+  background-color: #054c86;
   color: white;
-  padding: 5px 15px;
+  padding: 5px 10px;
   border-radius: 5px;
   font-weight: 600;
-  letter-spacing: 1.3px;
+  letter-spacing: 1.2px;
+  cursor: pointer;
+}
+
+/* Style for disabled form elements */
+input:disabled,
+select:disabled,
+textarea:disabled,
+button:disabled {
+  cursor: not-allowed;
+}
+
+.row-actions button {
+  background-color: #fff;
+  border: none;
+  outline: none;
+}
+
+.start-time-warning-msg,
+.end-time-warning-msg {
+  color: red;
   font-size: 15px;
+  /* visibility: hidden; */
+  display: none;
 }
