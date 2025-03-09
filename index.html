@@ -14,21 +14,26 @@
     <div class="main-container">
       <!-- Time Entries Section -->
       <div class="time-entries">
+        <div class="clock-in-out-btns">
+          <button class="clock-in">Clock In➡️</button>
+          <button class="clock-out">Clock Out ⬅️</button>
+        </div>
         <div class="individual-time">
           <i class="fa-solid fa-circle-arrow-right" style="color: green"></i>
-          <span>In: 9:30 AM</span>
+          <span id="clock-in-time">In: 9:30 AM</span>
         </div>
         <div class="individual-time">
           <i class="fa-solid fa-circle-arrow-left" style="color: red"></i>
-          <span>Out: 7:00 PM</span>
+          <span id="clock-out-time">Out: 7:00 PM</span>
         </div>
         <div class="individual-time">
           <i class="fa-solid fa-fingerprint"></i>
-          <span>Effective Hours: 8h 45m</span>
+          <span>Effective Hours:</span>
+          <span id="clock-in-eff-hrs">0h 00m</span>
         </div>
         <div class="individual-time">
           <i class="fa-solid fa-mug-hot" style="color: orange"></i>
-          <span>Break Hours: 0h 45m</span>
+          <span id="clock-out-eff-hrs">Break Hours: 0h 00m</span>
         </div>
         <div class="individual-time">
           <input type="date" name="date" id="date" />
@@ -49,7 +54,7 @@
               <th class="required">Start Time</th>
               <th class="required">End Time</th>
               <th>Duration Time</th>
-              <th></th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="timesheet-body"></tbody>
@@ -83,17 +88,18 @@
           <div class="times">
             <div>
               <h3>Effective Hours</h3>
-              <h3>8h 49m</h3>
+              <h3 id="total-effective-hours">0h 00m</h3>
             </div>
             <div>
               <h3>Break Hours</h3>
-              <h3>0h 45m</h3>
+              <h3 id="total-break-hours">0h 00m</h3>
             </div>
           </div>
         </div>
         <div class="submit-btns">
-          <button id="save-btn" >Save</button>
-          <button>Submit</button>
+          <button>Cancel</button>
+          <button id="save-btn">Save</button>
+          <button id="submit-btn">Submit</button>
         </div>
       </div>
     </div>
@@ -113,7 +119,8 @@
           </select>
         </td>
         <td colspan="2" class="task-details-td">
-          <input type="text" class="task-details" maxlength="255" required />
+          <textarea class="task-details" maxlength="255"></textarea>
+
           <div class="limit">
             <span class="task-details-warning">task-details-warning</span
             ><span class="char-count">0/255</span>
@@ -121,10 +128,11 @@
         </td>
         <td>
           <div class="time-picker start-time-picker">
-            <div class="time-display start-time-display">
+            <button class="time-display start-time-display">
               <span class="start-time-text">12:00 AM</span>
               <i class="fa-solid fa-clock"></i>
-            </div>
+            </button>
+            
             <div class="time-dropdown start-time-dropdown hidden">
               <div class="time-input">
                 <button type="button" class="start-hours-up">
@@ -155,10 +163,11 @@
         </td>
         <td>
           <div class="time-picker end-time-picker">
-            <div class="time-display end-time-display">
+            <button class="time-display end-time-display">
               <span class="end-time-text">12:00 AM</span>
               <i class="fa-solid fa-clock"></i>
-            </div>
+            </button>
+            
             <div class="time-dropdown end-time-dropdown hidden">
               <div class="time-input">
                 <button type="button" class="end-hours-up">
@@ -189,7 +198,12 @@
         </td>
         <td><div class="duration">0h 0m</div></td>
         <td class="row-actions">
-          <i class="fa-solid fa-trash delete-row" title="Delete row"></i>
+          <button class="delete-row">
+            <i class="fa-solid fa-trash" title="Delete row"></i>
+          </button>
+          <button class="split-row">
+            <i class="fa-brands fa-usb" title="Split row"></i>
+          </button>
         </td>
       </tr>
     </template>
