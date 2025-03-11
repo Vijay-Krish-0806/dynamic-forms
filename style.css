@@ -1,7 +1,6 @@
 * {
   box-sizing: border-box;
 }
-
 .time-entries {
   display: flex;
   justify-content: flex-end;
@@ -9,36 +8,60 @@
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-
 .individual-time {
   border: 1px solid rgb(202, 200, 200);
   padding: 5px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   border-radius: 5px;
-  white-space: nowrap;
+  background-color: #d6ebfd;
+}
+i {
+  width: 15px;
+  height: 15px;
+}
+#date {
+  border: none;
   background-color: #d6ebfd;
 }
 
-i {
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+input {
+  border: 1px solid #ccc;
+  &:focus {
+    outline: none;
+  }
 }
 
-#date {
+button {
   border: none;
+  outline: none;
+  background-color: #fff;
+  cursor: pointer;
 }
 
-/* Form container styles */
+textarea {
+  resize: none;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px;
+  &:focus {
+    outline: 3px solid #e1f3fc;
+  }
+}
+
+/* Status indicator */
+#state {
+  color: orange;
+  font-weight: bold;
+}
+
+/* Form container */
 .form-container {
   width: 100%;
   overflow-y: scroll;
   scrollbar-width: none;
-  height: 45vh;
+  /* height: 50vh; */
   border: 1px solid #ccc;
   border-radius: 5px;
 }
@@ -52,34 +75,23 @@ table {
 thead {
   background-color: #d6ebfd;
 }
-
-/* .field-row {
-  height: 80px;
-} */
-
 th {
   color: #012b4e;
   text-align: left;
   padding: 8px;
   border-bottom: 2px solid #ddd;
+  height: 40px;
 }
-
+.required::after {
+  content: " *";
+  color: red;
+}
 td {
   padding: 8px;
   border-bottom: 1px solid #ddd;
-  /* vertical-align: top; */
 }
-
-/* Required fields */
-.required::after {
-  content: "*";
-  color: red;
-}
-
-/* Form controls */
 td > select {
   min-width: 200px;
-  max-width: 250px;
   height: 35px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -89,30 +101,15 @@ td > select {
     outline: none;
   }
 }
-
-.comment-area {
-  padding: 6px;
-  position: relative;
+.task-details-td {
+  width: 30%;
 }
 
 .task-details {
   width: 90%;
   height: 50px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  resize: none;
   position: relative;
-  padding: 8px;
 }
-
-.task-details:focus {
-  outline: 3px solid #e1f3fc;
-}
-
-.task-details-td {
-  width: 30%;
-}
-
 .limit {
   font-size: 14px;
   margin-top: 2px;
@@ -127,17 +124,6 @@ td > select {
   visibility: hidden;
   letter-spacing: 1px;
 }
-
-.time-error {
-  position: absolute;
-  bottom: -20px;
-  left: 0;
-  background-color: #fff;
-  color: red;
-  font-size: 0.8em;
-  white-space: nowrap;
-}
-
 /* Time picker styles */
 .time-picker {
   position: relative;
@@ -156,18 +142,31 @@ td > select {
 }
 
 .time-dropdown {
-  position: absolute;
   /* width: 100%; */
+
+  height: 100px;
+  position: absolute;
   z-index: 10;
   background: white;
   border: 1px solid #ccc;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-  padding: 6px;
-  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+  border-radius: 5px;
+  padding: 10px;
   display: flex;
+  text-align: center;
   align-items: center;
   gap: 5px;
+  margin-top: 5px;
+}
+
+.time-error {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  background-color: #fff;
+  color: red;
+  font-size: 0.8em;
+  white-space: nowrap;
 }
 
 .hidden {
@@ -179,59 +178,41 @@ td > select {
   display: inline-flex;
   flex-direction: column;
   padding-right: 2px;
-}
-
-.time-input input {
-  width: 40px;
-  border: 1px solid #ccc;
-  padding: 5px;
-  border-radius: 4px;
-}
-
-.buttons {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  right: 0;
+  gap: 5px;
 }
 
 .time-input button {
   border: none;
-  /* background: transparent; */
   cursor: pointer;
-  font-size: 10px;
+  font-size: 13px;
   padding: 1px;
   height: 12px;
   width: 40px;
   background-color: #fff;
 }
-
+.time-input input {
+  width: 40px;
+  padding: 5px;
+  border-radius: 4px;
+  text-align: center;
+}
 #start-ampm,
 #end-ampm {
   padding: 5px;
   border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.set-time {
-  background: blue;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
-  border-radius: 3px;
-  margin-left: 5px;
+  border-radius: 5px;
 }
 
 .duration {
-  font-weight: bold;
-  color: #333;
+  font-weight: 600;
 }
 
-/* Status indicator */
-#state {
-  color: orange;
-  font-weight: bold;
+.delete-row {
+  color: red;
+  cursor: pointer;
+}
+.split-row {
+  cursor: pointer;
 }
 
 .add-row-container {
@@ -243,32 +224,12 @@ td > select {
 .add-row-btn {
   background-color: #4caf50;
   color: white;
-  border: none;
   padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   gap: 5px;
-  font-weight: bold;
-}
-
-.add-row-btn:hover {
-  background-color: #45a049;
-}
-
-/* Row action buttons */
-
-.delete-row {
-  color: red;
-  cursor: pointer;
-}
-.split-row {
-  cursor: pointer;
-}
-.split-row-disable {
-  pointer-events: none;
-  opacity: 0.3;
+  font-weight: 600;
 }
 
 #showWarningDiv {
@@ -278,105 +239,84 @@ td > select {
   top: 50%;
   transform: translate(-50%, -50%);
   background-color: white;
-  width: 300px;
+  width: 350px;
   height: 200px;
   border: 1px solid #ccc;
   border-radius: 6px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  z-index: 20;
   text-align: center;
-  padding: 20px;
   flex-direction: column;
-  justify-content: space-between;
+  z-index: 20;
+}
+.color-filled {
+  height: 50px;
+  width: 100%;
+  background-color: #054c86;
 }
 .warning-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  padding: 10px;
 }
 
 #showWarningDiv button {
   padding: 8px 16px;
   color: white;
-  border: none;
   border-radius: 4px;
-  cursor: pointer;
   background-color: #3a6d96;
 }
 
 #showWarningDiv .cancelBtn {
   background-color: rgb(248, 80, 80);
-  color: white;
 }
-
-.body-warning {
-  background-color: #d6d6d6;
-  input,
-  select,
-  textarea {
-    background-color: #d6d6d6;
-  }
-}
-
 .submit-container {
   display: grid;
   grid-template-columns: 3fr 1fr 1fr;
-  position: fixed;
-  bottom: 20px;
   width: 100%;
   align-items: center;
 }
 
 .comment-area {
   position: relative;
+  padding: 8px;
 }
 .comment-area textarea {
   width: 100%;
   height: 150px;
   margin-top: -15px;
   text-align: left;
-  resize: none;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  &:focus {
-    outline: 3px solid #e1f3fc;
-  }
 }
-
 .comment-area .limit {
-  display: inline-flex;
-  justify-content: flex-end;
+  display: flex;
+  justify-content: space-between;
   position: absolute;
   right: 0;
   bottom: -10px;
 }
-
 .time-sheet-details {
   background-color: #c7e6ff;
   height: 100px;
   text-align: center;
+  border-radius: 5px;
   h3 {
     margin: 0;
   }
-  border-radius: 5px;
 }
-
 .times {
   display: flex;
   width: 100%;
   justify-content: space-around;
 }
-
 .submit-btns {
   display: flex;
   align-items: center;
-  margin-left: 10px;
+  margin-left: 8px;
   gap: 10px;
 }
-
 .submit-btns button,
 .clock-in-out-btns button {
-  background-color: #054c86;
+  background-color: #105791;
   color: white;
   padding: 5px 10px;
   border-radius: 5px;
@@ -384,25 +324,15 @@ td > select {
   letter-spacing: 1.2px;
   cursor: pointer;
 }
-
-/* Style for disabled form elements */
 input:disabled,
 select:disabled,
 textarea:disabled,
 button:disabled {
   cursor: not-allowed;
 }
-
-.row-actions button {
-  background-color: #fff;
-  border: none;
-  outline: none;
-}
-
 .start-time-warning-msg,
 .end-time-warning-msg {
   color: red;
   font-size: 15px;
-  /* visibility: hidden; */
   display: none;
 }
