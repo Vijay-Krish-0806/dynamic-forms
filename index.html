@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- to overlay the entire body if popup is shown -->
+    <div class="overlay"></div>
     <div class="main-container">
       <!-- Time Entries Section -->
       <div class="time-entries">
@@ -40,9 +42,7 @@
           <input type="date" name="date" id="date" />
         </div>
       </div>
-
       <h3>Timesheet entries: <span id="state">Not Submitted</span></h3>
-
       <!-- Timesheet Form -->
       <div class="form-container">
         <table>
@@ -67,22 +67,24 @@
           </button>
         </div>
       </div>
-
       <!-- Warning Popup -->
-      <div id="showWarningDiv" class="warning-popup">
+      <div id="showWarningDiv">
+        <div class="color-filled"></div>
         <h2 id="warning-msg">Cannot add more than 12 rows</h2>
         <div class="warning-buttons">
           <button class="okBtn">OK</button>
           <button class="cancelBtn">Cancel</button>
         </div>
       </div>
-
       <!-- Submit Section -->
       <div class="submit-container">
         <div class="comment-area">
           <h3>Comment:</h3>
           <textarea name="comment-details" maxlength="255"></textarea>
-          <div class="limit"><span id="char-count">0/255</span></div>
+          <div class="limit">
+            <div class="comment-error">Difference is greater than 30min</div>
+            <span id="char-count">0/255</span>
+        </div>
         </div>
         <div class="time-sheet-details">
           <h3>Time sheet</h3>
@@ -98,14 +100,14 @@
           </div>
         </div>
         <div class="submit-btns">
-          <button>Cancel</button>
+          <button id="cancel-btn">Cancel</button>
           <button id="save-btn">Save</button>
           <button id="submit-btn">Submit</button>
         </div>
       </div>
     </div>
-
     <!-- Row Template -->
+     <!-- template tag which is not rendered in HTML but useful for cloning complex HTML -->
     <template id="row-template">
       <tr class="field-row">
         <td class="activity-icon"></td>
@@ -140,7 +142,6 @@
                   <i class="fa-solid fa-chevron-up"></i>
                 </button>
                 <input type="text" class="start-hours" />
-
                 <button type="button" class="start-hours-down">
                   <i class="fa-solid fa-chevron-down"></i>
                 </button>
@@ -208,7 +209,6 @@
         </td>
       </tr>
     </template>
-
-    <script src="index.js" type="module"></script>
+    <script src="main.js"></script>
   </body>
 </html>
